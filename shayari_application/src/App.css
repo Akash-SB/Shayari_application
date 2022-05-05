@@ -1,16 +1,55 @@
-.App {
-  text-align: center;
-}
-
 .App-logo {
   height: 40vmin;
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+@font-face {
+  font-family: 'BakbakOne-Regular';
+  src: local('BakbakOne-Regular'), url(./assets/fonts/BakbakOne-Regular.ttf) format('opentype');
+}
+
+@font-face {
+  font-family: 'Hind-Regular';
+  src: local('Hind-Regular'), url(./assets/fonts/Hind-Regular.ttf) format('opentype');
+}
+
+@font-face {
+  font-family: 'Kalam-Regular';
+  src: local('Kalam-Regular'), url(./assets/fonts/Kalam-Regular.ttf) format('opentype');
+}
+
+@font-face {
+  font-family: 'Modak-Regular';
+  src: local('Modak-Regular'), url(./assets/fonts/Modak-Regular.ttf) format('opentype');
+}
+
+@font-face {
+  font-family: 'Poppins-Regular';
+  src: local('Poppins-Regular'), url(./assets/fonts/Poppins-Regular.ttf) format('opentype');
+}
+
+@font-face {
+  font-family: 'Rajdhani-Regular';
+  src: local('Rajdhani-Regular'), url(./assets/fonts/Rajdhani-Regular.ttf) format('opentype');
+}
+
+@font-face {
+  font-family: 'Teko-Medium';
+  src: local('Teko-Medium'), url(./assets/fonts/Teko-Medium.ttf) format('opentype');
+}
+
+@font-face {
+  font-family: 'Tillana-Medium';
+  src: local('Tillana-Medium'), url(./assets/fonts/Tillana-Medium.ttf) format('opentype');
+}
+
+@font-face {
+  font-family: 'VarelaRound-Regular';
+  src: local('VarelaRound-Regular'), url(./assets/fonts/VarelaRound-Regular.ttf) format('opentype');
+}
+
+.App {
+  font-family: 'Kalam-Regular';
 }
 
 .App-header {
@@ -26,6 +65,24 @@
 
 .App-link {
   color: #61dafb;
+}
+
+.wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.form-card {
+  margin: 0 auto;
+}
+
+.shayari-editor > * {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.author-name {
+  text-align: right;
 }
 
 @keyframes App-logo-spin {
