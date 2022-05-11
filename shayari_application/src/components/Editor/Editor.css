@@ -1,0 +1,21 @@
+.form-card {
+    margin: 0 auto;
+}
+
+.shayari-editor>* {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.shayari-editor {
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+}
+
+.author-name {
+    text-align: right;
+}
+
+.shayari_card_item .form-card {
+    height: 350px;
+}

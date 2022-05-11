@@ -1,0 +1,20 @@
+.shayari_card_item {
+    position: relative;
+    width: 25%;
+}
+
+.shayari_card_item button:first-of-type {
+    position: absolute;
+    right: 15px;
+    top: 7px;
+    z-index: 10;
+    border: none;
+}
+
+.shayari_card_item button:last-of-type {
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+    z-index: 10;
+    border: none;
+}

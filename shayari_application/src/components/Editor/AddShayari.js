@@ -1,8 +1,10 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { Form, InputGroup, Button, Card, Row, Col, Alert } from 'react-bootstrap'
-import CardHeader from 'react-bootstrap/esm/CardHeader';
-import ShayariCard from './ShayariCard';
+import CardHeader from 'react-bootstrap/esm/CardHeader'
+import ShayariCard from './ShayariCard'
 import shayariDataService from '../../services/shayari.services'
+import { useLocation } from 'react-router-dom'
+import './Editor.css'
 
 const AddShayari = () => { 
   const [isSwitchOn, setIsSwitchOn] = useState(false);
@@ -16,10 +18,28 @@ const AddShayari = () => {
   const [fontSizeShayari, setFontSize] = useState(16);
   const [shayriFontFamily, setshayriFontFamily] = useState("BakbakOne-Regular");  
   const [notification, setNotification] = useState({ type: '', msg: '' });
+  const [updateId, setUpdateId] = useState("");
+  const location = useLocation();
 
   const onSwitchAction = () => {
     setIsSwitchOn(!isSwitchOn);
   };
+
+  useEffect(() => {
+    if (location.state != null) {
+      setAuthorName(location.state.writer_name);
+      setCategory(location.state.category);
+      setShayri(location.state.shayari_text);
+      setColor(location.state.background_color);
+      setFontColor(location.state.font_color);
+      setFontSize(location.state.font_size);
+      setshayriFontFamily(location.state.font_family);
+      setIsSwitchOn(location.state.gradient_background);
+      setGradientSingleColor(location.state.gradient_first_color);
+      setGradientSecondColor(location.state.gradient_second_color);
+      setUpdateId(location.state.id);
+    }
+  }, [location.state]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -36,12 +56,17 @@ const AddShayari = () => {
         'gradient_first_color': gradientSingleColor,
         'gradient_second_color': gradientSecondColor,
         'font_color': fontColor,
-        'font_family': fontSizeShayari,
-        'font_size': shayriFontFamily
+        'font_family': shayriFontFamily,
+        'font_size': fontSizeShayari
       };    
       try {
-        await shayariDataService.addShayari(newShayari);
-        setNotification({ type: 'success', msg: "New Shayri added successfully" });
+        if (updateId !== undefined && updateId !== "") { 
+          await shayariDataService.updateShayari(updateId, newShayari);
+          setNotification({ type: 'success', msg: "Shayri updated successfully" });
+        } else {
+          await shayariDataService.addShayari(newShayari);
+          setNotification({ type: 'success', msg: "New Shayri added successfully" });
+        }        
         setShayri("");
         setAuthorName("");
       } catch (error) {
@@ -54,9 +79,12 @@ const AddShayari = () => {
     {(notification.msg) && <Alert variant={notification.type} dismissible onClose={(e) => setNotification({})}>
       {notification.msg}
     </Alert>}
-    <div className='row shayari-editor'>      
-      <ShayariCard isSwitchOn={isSwitchOn} shayri={shayri} fontColor={fontColor} fontSizeShayari={fontSizeShayari} gradientSecondColor={gradientSecondColor} gradientSingleColor={gradientSingleColor} color={color} category={category} authorName={authorName} shayriFontFamily={shayriFontFamily}></ShayariCard>
-      <Card className='mt-4 col-8 form-card' border="primary">
+    <div className='row shayari-editor'>     
+      <div className='col-3 mt-4 mb-4 shayari_card_container'>
+        <ShayariCard isSwitchOn={isSwitchOn} shayri={shayri} fontColor={fontColor} fontSizeShayari={fontSizeShayari} gradientSecondColor={gradientSecondColor} gradientSingleColor={gradientSingleColor} color={color} category={category} authorName={authorName} shayriFontFamily={shayriFontFamily}></ShayariCard>
+      </div>
+      <div className='col-1'></div>
+      <Card className='col-8 form-card mt-4 mb-4' border="primary">
         <CardHeader >Shayari Editor</CardHeader>        
       <Form onSubmit={handleSubmit}>
          <Card.Body >
@@ -84,7 +112,7 @@ const AddShayari = () => {
              <Form.Group  controlId="category" className='mb-3'>
               <InputGroup>
                 <InputGroup.Text id="category">Category</InputGroup.Text>
-                  <Form.Select defaultValue="Love" onChange={e => setCategory(e.target.value)}>
+                  <Form.Select value={category} onChange={e => setCategory(e.target.value)}>
                     <option>Love</option>
                     <option>Friendship</option>
                     <option>Attitude</option>
@@ -165,7 +193,7 @@ const AddShayari = () => {
               <Form.Group  controlId="fontSize">
                 <InputGroup>
                   <InputGroup.Text id="fontSize">Font Size</InputGroup.Text>
-                    <Form.Select defaultValue={fontSizeShayari} onChange={e => setFontSize(parseInt(e.target.value))}>
+                    <Form.Select value={fontSizeShayari} onChange={e => setFontSize(parseInt(e.target.value))}>
                       <option>14</option>
                       <option>16</option>
                       <option>18</option>
@@ -180,7 +208,7 @@ const AddShayari = () => {
             <Form.Group  controlId="fontfamily">
                 <InputGroup>
                   <InputGroup.Text id="fontfamily">Font Family</InputGroup.Text>
-                    <Form.Select defaultValue={shayriFontFamily} onChange={e => setshayriFontFamily(e.target.value)}>
+                    <Form.Select value={shayriFontFamily} onChange={e => setshayriFontFamily(e.target.value)}>
                       <option>BakbakOne-Regular</option>
                       <option>Hind-Regular</option>
                       <option>Kalam-Regular</option>
@@ -195,7 +223,9 @@ const AddShayari = () => {
             </Col>
           </Row>   
       </Card.Body>    
-      <Card.Footer><Button type="submit">Add Data</Button></Card.Footer>
+      <Card.Footer>
+            {updateId ? <Button type="submit">Update Data</Button> : <Button type="submit">Add Data</Button>}
+      </Card.Footer>
     </Form>
     </Card>
     </div>
