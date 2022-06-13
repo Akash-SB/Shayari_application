@@ -1,0 +1,10 @@
+.status_cards_wrapper {
+    width: 25%;
+    position: relative;
+}
+
+.status_cards_wrapper button {
+    position: absolute;
+    bottom: 13px;
+    right: 15px;
+}

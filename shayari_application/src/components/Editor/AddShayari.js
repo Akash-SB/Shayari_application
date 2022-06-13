@@ -5,6 +5,7 @@ import ShayariCard from './ShayariCard'
 import shayariDataService from '../../services/shayari.services'
 import { useLocation } from 'react-router-dom'
 import './Editor.css'
+import categorySevices from '../../services/category.sevices'
 
 const AddShayari = () => { 
   const [isSwitchOn, setIsSwitchOn] = useState(false);
@@ -20,6 +21,7 @@ const AddShayari = () => {
   const [notification, setNotification] = useState({ type: '', msg: '' });
   const [updateId, setUpdateId] = useState("");
   const location = useLocation();
+  const [categoryList, setCategoryList] = useState([]);
 
   const onSwitchAction = () => {
     setIsSwitchOn(!isSwitchOn);
@@ -75,6 +77,15 @@ const AddShayari = () => {
     }
   };
 
+  useEffect(() => { 
+    getCategories();
+  }, []);
+
+  const getCategories = async () => {
+    const data = await categorySevices.getAllCategory();
+    setCategoryList(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+  }
+
   return <>
     {(notification.msg) && <Alert variant={notification.type} dismissible onClose={(e) => setNotification({})}>
       {notification.msg}
@@ -109,21 +120,14 @@ const AddShayari = () => {
         </Form.Group>
         <Row>
           <Col>
-             <Form.Group  controlId="category" className='mb-3'>
+             <Form.Group  controlId="category" className='mb-4 mt-2'>
               <InputGroup>
-                <InputGroup.Text id="category">Category</InputGroup.Text>
+                <InputGroup.Text id="category">Font Size</InputGroup.Text>
                   <Form.Select value={category} onChange={e => setCategory(e.target.value)}>
-                    <option>Love</option>
-                    <option>Friendship</option>
-                    <option>Attitude</option>
-                    <option>Mother</option>
-                    <option>Sad</option>
-                    <option>Good Morning</option>
-                    <option>Good Night</option>
-                    <option>Relationship</option>
+                    {categoryList.map((doc) => { return <option key={doc.id}>{doc.category}</option>; })}           
                   </Form.Select>            
               </InputGroup>
-            </Form.Group>
+            </Form.Group> 
           </Col>
           <Col>
           <Form.Group  controlId="backgroundColor" className='mb-3'>
@@ -224,7 +228,7 @@ const AddShayari = () => {
           </Row>   
       </Card.Body>    
       <Card.Footer>
-            {updateId ? <Button type="submit">Update Data</Button> : <Button type="submit">Add Data</Button>}
+        {updateId ? <Button type="submit">Update Data</Button> : <Button type="submit">Add Data</Button>}
       </Card.Footer>
     </Form>
     </Card>

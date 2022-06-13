@@ -1,0 +1,16 @@
+.category_cards_wrapper {
+    width: 20%;
+    position: relative;
+}
+
+.category_cards_wrapper button {
+    position: absolute;
+    bottom: 13px;
+    right: 15px;
+}
+
+.category_cards_wrapper button:first-of-type {
+    position: absolute;
+    bottom: 13px;
+    right: 55px;
+}

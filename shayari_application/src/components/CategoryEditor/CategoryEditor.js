@@ -1,10 +1,13 @@
 import React, {useState, useEffect} from 'react'
-import { Form, InputGroup, Button, Card, Row, Col, Alert } from 'react-bootstrap'
+import { Form, InputGroup, Button, Card, Row, Col, ProgressBar } from 'react-bootstrap'
 import CardHeader from 'react-bootstrap/esm/CardHeader'
 import { useLocation } from 'react-router-dom'
-import './Category.css'
+import './CategoryEditor.css'
 import CategoryCard from './CategoryCard'
+import categorySevices from '../../services/category.sevices'
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 import { storage } from '../../firebase-config'
+import Notification from '../Notification/Notification'
 
 const CategoryEditor = () => { 
   const [category, setCategory] = useState("Love");
@@ -12,11 +15,12 @@ const CategoryEditor = () => {
   const [gradientSingleColor, setGradientSingleColor] = useState("#ce4668");
   const [gradientSecondColor, setGradientSecondColor] = useState("#563d7c");
   const [categoryFontSize, setcategoryFontSize] = useState(16);
-  const [categoryIcon, setCategoryIcon] = useState("");
   const [notification, setNotification] = useState({ type: '', msg: '' });
   const [file, setFile] = useState(null);
   const [updateId, setUpdateId] = useState("");
+  const [categoryIcon, setCategoryIcon] = useState("");
   const location = useLocation();
+  const [progress, setProgress] = useState();
 
   useEffect(() => {
     if (location.state != null) {
@@ -34,23 +38,61 @@ const CategoryEditor = () => {
     setFile(e.target.files[0])
   }
 
-  const handleUpload = async(e) => {
-    e.preventDefault();
-    const path = `/category_images/${file.name}`;
-    const ref = storage.ref(path);
-    await ref.put(file);
-    const url = await ref.getDownloadURL();
-    setCategoryIcon(url);
-    setFile(null);
-  }
+  useEffect(() => {
+    const uploadFile = () => { 
+      const storageRef = ref(storage, 'category_images/' + file.name);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      // Listen for state changes, errors, and completion of the upload.
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+          const prog = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setProgress(prog);
+            switch (snapshot.state) {
+              case 'paused':
+                console.log('Upload is paused');
+                break;
+              case 'running':
+                console.log('Upload is running');
+                break;
+              default :
+                break;
+            }
+          }, 
+          (error) => {
+            switch (error.code) {
+              case 'storage/unauthorized':
+                setNotification({ type: "info", msg: "User doesn't have permission to access the object" });
+                break;
+              case 'storage/canceled':
+                setNotification({ type: "info", msg: "User canceled the upload" });                
+                break;
+              case 'storage/unknown':
+                setNotification({ type: "info", msg: " Unknown error occurred" });
+                break;
+              default:
+                break
+            }
+          }, 
+          () => {
+            // Upload completed successfully, now we can get the download URL
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              setCategoryIcon(downloadURL);
+              setProgress(0);
+            });
+          }
+        );
+    };
+    
+    file && uploadFile();
+  }, [file]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setNotification({});
-    if (category === "" || categoryIcon === "") {
-      setNotification({ status: 'danger', msg: "Please fill all the fields" });
+    if (category === "") {
+      setNotification({ type: 'info', msg: "Please fill all the fields" });
     } else {
-      handleUpload();
       const newCategory = {
         'category': category,
         'gradient_first_color': gradientSingleColor,
@@ -61,32 +103,30 @@ const CategoryEditor = () => {
       };    
       try {
         if (updateId !== undefined && updateId !== "") { 
-          
-          setNotification({ type: 'success', msg: "Category updated successfully" });
-        } else {
-         
-          setNotification({ type: 'success', msg: "New Category added successfully" });
-        }        
+          categorySevices.updateCategory(updateId,newCategory);
+          setNotification({ type: 'info', msg: "Category updated successfully" });
+        } else {          
+          categorySevices.addCategory(newCategory);
+          setNotification({ type: 'dark', msg: "New Category added successfully" });                    
+        }
         setCategory("");
-        setCategoryIcon("");
+        setFile(null);            
+        setCategoryIcon("");  
       } catch (error) {
-        setNotification({ type: 'danger', msg: error.message });
+        setNotification({ type: 'info', msg: error.message });
       } 
     }
   };
 
   return <>
-    {(notification.msg) && <Alert variant={notification.type} dismissible onClose={(e) => setNotification({})}>
-      {notification.msg}
-    </Alert>}
     <div className='row category-editor'>     
-      <div className='col-3 mt-4 mb-4 category_card_container p-4 pt-0'>
-        <CategoryCard icon={file} fontColor={fontColor} categoryFontSize={categoryFontSize} category={category} gradientSingleColor={gradientSingleColor} gradientSecondColor={gradientSecondColor}/>
+      <div className='col-10 col-md-3 mt-4 mb-4 category_card_container p-4 pt-0'>        
+        <CategoryCard icon={ file ? file : categoryIcon } fontColor={fontColor} categoryFontSize={categoryFontSize} category={category} gradientSingleColor={gradientSingleColor} gradientSecondColor={gradientSecondColor}/>
       </div>
-      <Card className='col-9 form-card mt-4 mb-4' border="primary">
-        <CardHeader >Category Editor</CardHeader>        
+      <Card className='col-10 col-md-8 form-card mt-4 mb-4' border="primary">
+        <CardHeader>Category Editor</CardHeader>        
       <Form onSubmit={handleSubmit}>
-         <Card.Body >
+        <Card.Body>
         <Form.Group  controlId="validationCategoryText" className='mb-3'>
           <InputGroup >
             <InputGroup.Text id="validationCategoryText">Category</InputGroup.Text>
@@ -95,7 +135,8 @@ const CategoryEditor = () => {
         </Form.Group>   
         <Form.Group controlId="formFile" className="mb-3">
           <Form.Control type="file" onChange={fileHandler}/>
-        </Form.Group>    
+        </Form.Group>
+        {(progress > 0) ? <ProgressBar animated striped now={progress} label={`${progress}%`} /> : null}            
         <Form.Group  controlId="validationShayariText" className='mb-3'>
           <Row><Col><InputGroup >
             <InputGroup.Text id="shayariText">First Color</InputGroup.Text>
@@ -153,8 +194,9 @@ const CategoryEditor = () => {
         {updateId ? <Button type="submit">Update Data</Button> : <Button type="submit">Add Data</Button>}
       </Card.Footer>
     </Form>
-    </Card>
+      </Card>
     </div>
+    {(notification.msg) && <Notification variant={notification.type} message={notification.msg} onCloseHandler={() => setNotification({})}></Notification>}
     </>
 };
 

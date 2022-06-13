@@ -1,5 +1,5 @@
 import React from 'react'
-import { Container, Navbar, Form, FormControl, Button, Nav } from 'react-bootstrap'
+import { Container, Navbar, Form, FormControl, Button, Nav, NavDropdown } from 'react-bootstrap'
 import logo from "../../assets/img/quotes.png"
 import { Link } from 'react-router-dom';
 import { MdCategory, MdReceiptLong, MdMenuBook } from "react-icons/md";
@@ -31,23 +31,40 @@ function NavigationBar() {
       </Navbar>
       <Navbar bg="light" className='border-bottom border-primary mb-4' sticky="top">
         <Container>
-          <Nav className="me-auto">            
-            <Nav.Link>
-              <MdCategory />
-              <Link to="/category">Category</Link>
-            </Nav.Link>
-            <Nav.Link>
-              <MdReceiptLong />
-              <Link to="/shayari">Shayari</Link>
-            </Nav.Link>
-            <Nav.Link>
-              <MdMenuBook />
-              <Link to="/writer">Writers</Link>              
-            </Nav.Link>
-            <Nav.Link>
-              <RiImageEditFill />
-              <Link to="/editor">Editor</Link>
-            </Nav.Link>
+          <Nav className="me-auto">
+            <NavDropdown title="Shayari" id="nav-dropdown">
+              <Nav.Link>
+                <MdReceiptLong />
+                <Link to="/shayari">All Shayari</Link>
+              </Nav.Link>
+              <NavDropdown.Divider />
+              <Nav.Link>
+                <RiImageEditFill />
+                <Link to="/editor">Shayari Editor</Link>
+              </Nav.Link>
+            </NavDropdown>
+            <NavDropdown title="Category" id="nav-dropdown">
+              <Nav.Link>
+                <MdCategory />
+                <Link to="/category">All Category</Link>
+              </Nav.Link> 
+              <NavDropdown.Divider />
+              <Nav.Link>
+                <RiImageEditFill />
+                <Link to="/category-editor">Category Editor</Link>
+              </Nav.Link>
+            </NavDropdown>
+            <NavDropdown title="Image Status" id="nav-dropdown">
+               <Nav.Link>
+                <MdMenuBook />
+                <Link to="/image-status">All Status</Link>              
+              </Nav.Link>
+              <NavDropdown.Divider />
+               <Nav.Link>
+                <RiImageEditFill />
+                <Link to="/status-editor">Status Editor</Link>              
+              </Nav.Link>
+            </NavDropdown>    
           </Nav>
         </Container>
       </Navbar>
